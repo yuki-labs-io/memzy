@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Memzy
+
+Memzy is your intelligent memory assistant built with Next.js 16, featuring secure Google OAuth authentication.
+
+## Features
+
+- 🔐 **Secure Authentication**: Google OAuth 2.0 integration with NextAuth.js
+- 🛡️ **Role-Based Access Control**: Admin, Member, and Viewer roles with granular permissions
+- 🚀 **Modern Stack**: Next.js 16 (App Router), TypeScript, Tailwind CSS
+- 🎨 **Responsive Design**: Mobile-first design with dark mode support
+- 📝 **Type-Safe**: Full TypeScript support with strict type checking
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18 or higher
+- npm or yarn
+- Google Cloud Console project with OAuth credentials
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yuki-labs-io/memzy.git
+cd memzy
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit `.env.local` with your credentials:
+- `NEXTAUTH_URL`: Your application URL (e.g., `http://localhost:3000`)
+- `NEXTAUTH_SECRET`: Generate with `openssl rand -base64 32`
+- `GOOGLE_CLIENT_ID`: From Google Cloud Console
+- `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
 
-## Learn More
+See [Authentication Setup Guide](./docs/AUTH_SETUP.md) for detailed instructions.
 
-To learn more about Next.js, take a look at the following resources:
+4. Run the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentation
 
-## Deploy on Vercel
+- **[Authentication Setup Guide](./docs/AUTH_SETUP.md)**: Complete guide for setting up Google OAuth
+- **[PRD: Login Flow](./product-lens/prd/features/login-flow-with-google.md)**: Product requirements document
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+memzy/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   │   ├── (protected)/       # Protected routes
+│   │   ├── api/auth/          # NextAuth API routes
+│   │   ├── login/             # Login page
+│   │   └── layout.tsx         # Root layout
+│   ├── components/            # React components
+│   │   └── auth/              # Authentication components
+│   └── lib/                   # Utility functions and configs
+│       └── auth/              # Authentication logic
+├── middleware.ts              # Route protection middleware
+├── docs/                      # Documentation
+└── .product-lens/             # Product requirements
+```
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Authentication
+
+Memzy uses NextAuth.js with Google OAuth 2.0 for authentication. Key features:
+
+- **Stateless JWT sessions** for scalability
+- **Secure HTTP-only cookies** to prevent XSS attacks
+- **CSRF protection** via state parameter
+- **Role-based access control** with three default roles
+- **Server-side and client-side route protection**
+
+See the [Authentication Setup Guide](./docs/AUTH_SETUP.md) for more details.
+
+## Security
+
+- OAuth 2.0 with Google
+- JWT-based sessions
+- HTTP-only secure cookies
+- CSRF protection
+- Minimal OAuth scopes
+- Server-side token validation
+
+## Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: Custom components with Radix UI primitives
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is private and proprietary to Yuki Labs.
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the development team.
+
+---
+
+Made with ❤️ by [Yuki Labs](https://github.com/yuki-labs-io)
