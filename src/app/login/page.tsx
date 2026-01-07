@@ -3,7 +3,6 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
