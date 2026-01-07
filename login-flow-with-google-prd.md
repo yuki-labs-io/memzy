@@ -1,0 +1,690 @@
+# PRD: Login Flow with Google (OAuth 2.0)
+
+**Feature Name:** login-flow-with-google  
+**Created:** 2026-01-07  
+**Status:** Draft  
+**Source Issue:** [Requirement] login-flow-with-google
+
+---
+
+## 1. Context & Problem
+
+### Current State
+Users currently rely on traditional authentication methods that require manual password creation and management. This creates friction in the user experience and leads to common issues associated with password-based authentication.
+
+### Problem
+- **Password Fatigue:** Users frequently forget passwords, leading to increased support requests and abandoned login attempts
+- **High Friction:** Traditional login/registration flows require multiple steps, creating barriers to entry
+- **Conversion Impact:** Manual authentication processes negatively impact user conversion rates and retention during onboarding
+- **Security Concerns:** Password management places security burden on both users and the system
+
+### Why This Matters
+Reducing authentication friction is critical for user acquisition and retention. Modern users expect seamless, secure authentication options. Social login with trusted providers like Google can significantly improve the user experience while maintaining security standards.
+
+---
+
+## 2. Objective
+
+### Goal
+Implement a secure, frictionless authentication flow using Google OAuth 2.0 that allows users to sign in or register using their Google accounts.
+
+### What Will Change
+- Users will have the option to authenticate using their existing Google account
+- New users can register instantly without creating a password
+- Existing users can link their Google account to their profile
+- Authentication time will be reduced from manual form completion to a few clicks
+
+### Strategic Alignment
+This feature aligns with the product strategy to:
+- Reduce barriers to user adoption
+- Improve onboarding conversion rates
+- Provide industry-standard authentication options
+- Enhance security by leveraging OAuth 2.0 protocol
+
+---
+
+## 3. Scope (In Scope)
+
+### Included
+- **Google OAuth Integration:** Complete OAuth 2.0 flow with Google as identity provider
+- **New User Registration:** Automatic account creation for first-time Google users
+- **Existing User Login:** Authentication for users who have previously registered
+- **Account Linking:** Ability to associate Google account with existing email-based accounts
+- **Logout Functionality:** Proper session termination and token cleanup
+- **Token Validation:** Backend validation of Google OAuth tokens (access_token, id_token)
+- **Security Compliance:** Implementation following OAuth 2.0 best practices
+
+### Key Deliverables
+- "Sign in with Google" button on login page
+- OAuth callback handler
+- Backend token validation and user session management
+- Account creation/linking logic
+- User authentication state management
+
+---
+
+## 4. Non-Objectives (Out of Scope)
+
+### Explicitly NOT Included
+- **Other Social Providers:** Apple, Facebook, Microsoft, GitHub, or other OAuth providers
+- **Multi-Account Management:** Handling multiple Google emails per user
+- **Database Storage:** User information storage in database (deferred to future version)
+- **Advanced Permissions:** Accessing Google services beyond basic profile information
+- **Profile Sync:** Automatic synchronization of Google profile changes
+- **Email Verification Flow:** Google-verified emails are trusted by default
+
+### Intentional Limitations
+This is a foundational implementation focused solely on Google OAuth authentication. Extended features like multi-provider support and advanced account management will be addressed in future iterations.
+
+---
+
+## 5. Personas & Users
+
+### Primary Persona: New User
+- **Profile:** First-time visitor exploring the platform
+- **Needs:** Quick, frictionless registration without password creation
+- **Pain Points:** Reluctant to create another password; wants instant access
+- **Technical Proficiency:** Basic to intermediate; familiar with social login
+- **Goal:** Start using the platform immediately
+
+### Secondary Persona: Returning User
+- **Profile:** Existing user who prefers social authentication
+- **Needs:** Fast, secure login without remembering passwords
+- **Pain Points:** Password fatigue; wants simplified access
+- **Technical Proficiency:** Basic to advanced
+- **Goal:** Quick access to their account
+
+### Tertiary Persona: Security-Conscious User
+- **Profile:** User who values security and privacy
+- **Needs:** Trusted authentication method without managing passwords
+- **Pain Points:** Concerns about password reuse and security breaches
+- **Technical Proficiency:** Intermediate to advanced
+- **Goal:** Secure authentication through trusted provider
+
+---
+
+## 6. Main Flow (User Journey)
+
+### Happy Path: New User Registration via Google
+
+1. **Entry Point:** User lands on login/registration page
+2. **Action:** User clicks "Sign in with Google" button
+3. **Redirect:** Application redirects to Google OAuth consent screen
+4. **Authorization:** User reviews requested permissions and clicks "Allow"
+5. **Callback:** Google redirects back to application with authorization code
+6. **Token Exchange:** Backend exchanges authorization code for access_token and id_token
+7. **Token Validation:** Backend validates:
+   - Token signature using Google's public keys
+   - Issuer (iss) claim matches Google
+   - Audience (aud) claim matches application's client ID
+   - Token expiration (exp) is valid
+8. **Account Check:** System checks if email exists in database
+9. **Account Creation:** System creates new user account with Google-verified email
+10. **Session Creation:** System establishes authenticated session
+11. **Redirect:** User is redirected to application dashboard/home
+12. **Exit Point:** User is authenticated and can access protected resources
+
+### Alternative Flow: Existing User Login
+
+- Steps 1-7 are identical
+- Step 8: System finds existing account with matching email
+- Step 9: System links Google account to existing user profile (if not already linked)
+- Steps 10-12 proceed as normal
+
+### Alternative Flow: Re-authorization Required
+
+- If user has revoked Google permissions
+- System detects invalid/missing refresh token
+- User must re-authorize through full OAuth flow
+
+---
+
+## 7. Business Rules
+
+### BR-1: Email Trust
+- Emails returned by Google OAuth are considered verified
+- No additional email verification is required
+
+### BR-2: Email Uniqueness
+- System must not allow multiple internal accounts with the same email address
+- One email = one user account (can have multiple login methods)
+
+### BR-3: Account Linking
+- If email already exists in system:
+  - Link Google OAuth to existing account
+  - Do not create duplicate account
+- User can subsequently use either Google login or existing authentication method
+
+### BR-4: Permission Revocation
+- If user revokes Google permissions:
+  - System must detect revoked access
+  - Require new consent on next login attempt
+  - User should be able to re-authorize
+
+### BR-5: Token Handling
+- Access tokens are used for verification only
+- Tokens must not be stored in browser local storage
+- Session management uses secure HTTP-only cookies
+
+### BR-6: Minimal Permissions
+- Request only essential OAuth scopes:
+  - Profile information (name, profile picture)
+  - Email address
+- Do not request access to Google services (Drive, Calendar, etc.)
+
+---
+
+## 8. Functional Requirements (FR-x)
+
+### FR-1: Display Google Sign-In Option (Must-Have)
+**User Story:** As a user, I want to see a "Sign in with Google" button on the login page, so that I know I can authenticate using my Google account.
+
+**Acceptance Criteria:**
+- Button displays Google logo and "Sign in with Google" text
+- Button follows Google's branding guidelines
+- Button is prominently placed on login/registration page
+- Button is responsive across mobile and desktop
+
+### FR-2: Initiate OAuth Flow (Must-Have)
+**User Story:** As a user, I want to click the Google sign-in button and be redirected to Google's authorization page, so that I can grant permission to the application.
+
+**Acceptance Criteria:**
+- Clicking button initiates OAuth 2.0 authorization code flow
+- User is redirected to Google consent screen
+- Redirect includes correct client_id, redirect_uri, scope, and state parameters
+- State parameter is used to prevent CSRF attacks
+
+### FR-3: Handle OAuth Callback (Must-Have)
+**User Story:** As a system, I need to receive and process the authorization code from Google, so that I can authenticate the user.
+
+**Acceptance Criteria:**
+- Callback endpoint receives authorization code
+- System validates state parameter matches original request
+- System exchanges code for access_token and id_token
+- Error handling for failed token exchange
+
+### FR-4: Validate ID Token (Must-Have)
+**User Story:** As a system, I need to validate the Google ID token, so that I can trust the user's identity.
+
+**Acceptance Criteria:**
+- Verify token signature using Google's public keys
+- Validate issuer (iss) is accounts.google.com or https://accounts.google.com
+- Validate audience (aud) matches application's client ID
+- Verify token is not expired (exp claim)
+- Extract user email and profile information
+
+### FR-5: Create New User Account (Must-Have)
+**User Story:** As a new user, I want my account to be automatically created when I sign in with Google, so that I can start using the application immediately.
+
+**Acceptance Criteria:**
+- If email does not exist, create new user account
+- Store user's email, name, and profile picture URL
+- Mark email as verified
+- Link Google account to user profile
+- Generate authenticated session
+
+### FR-6: Authenticate Existing User (Must-Have)
+**User Story:** As a returning user, I want to sign in with my Google account, so that I can access my existing account.
+
+**Acceptance Criteria:**
+- If email exists, authenticate user
+- Link Google OAuth if not already linked
+- Do not create duplicate account
+- Generate authenticated session
+- Redirect to appropriate page (dashboard/previous location)
+
+### FR-7: Handle Account Linking (Should-Have)
+**User Story:** As an existing user with a password-based account, I want to link my Google account, so that I can use Google sign-in in the future.
+
+**Acceptance Criteria:**
+- If user has existing account with same email, link accounts
+- User can subsequently use either authentication method
+- System prevents duplicate account creation
+- Provide feedback about successful linking
+
+### FR-8: Logout Functionality (Must-Have)
+**User Story:** As a user, I want to securely log out of the application, so that my session is properly terminated.
+
+**Acceptance Criteria:**
+- Logout clears user session
+- Logout invalidates session tokens
+- User is redirected to login page
+- User must re-authenticate to access protected resources
+
+### FR-9: Error Handling (Must-Have)
+**User Story:** As a user, I want to see clear error messages if authentication fails, so that I understand what went wrong and how to proceed.
+
+**Acceptance Criteria:**
+- Display user-friendly error messages for common scenarios
+- Handle user denying Google permissions
+- Handle expired or invalid tokens
+- Handle network errors during OAuth flow
+- Provide option to retry authentication
+
+### FR-10: Loading States (Should-Have)
+**User Story:** As a user, I want to see loading indicators during authentication, so that I know the system is processing my request.
+
+**Acceptance Criteria:**
+- Display loading state during OAuth redirect
+- Display loading state during token validation
+- Prevent multiple simultaneous authentication attempts
+- Provide visual feedback throughout the process
+
+---
+
+## 9. Non-Functional Requirements (NFR-x)
+
+### NFR-1: Performance
+- **Requirement:** OAuth flow completion (from button click to authenticated state) should complete within 3-5 seconds under normal conditions
+- **Rationale:** Fast authentication improves user experience and conversion
+- **Measurement:** Monitor authentication completion time via analytics
+
+### NFR-2: Security
+- **Token Security:** Access tokens must never be exposed in URLs or client-side storage
+- **HTTPS Only:** All OAuth communication must occur over HTTPS
+- **CSRF Protection:** Implement state parameter validation to prevent CSRF attacks
+- **Token Validation:** Always validate tokens server-side, never trust client-side tokens
+- **Session Security:** Use secure, HTTP-only cookies for session management
+- **Scope Minimization:** Request minimal OAuth scopes necessary
+
+### NFR-3: Reliability
+- **Uptime:** Authentication system should maintain 99.9% uptime
+- **Error Recovery:** Graceful degradation if Google OAuth is temporarily unavailable
+- **Retry Logic:** Implement appropriate retry mechanisms for transient failures
+- **Monitoring:** Log all authentication attempts and failures for monitoring
+
+### NFR-4: Scalability
+- **Concurrent Users:** Support minimum 1,000 concurrent OAuth flows
+- **Token Validation:** Optimize token validation to minimize latency
+- **Caching:** Cache Google's public keys with appropriate TTL
+- **Rate Limiting:** Implement rate limiting to prevent abuse
+
+### NFR-5: Compliance
+- **OAuth 2.0 Standard:** Strict adherence to OAuth 2.0 specification
+- **Google Guidelines:** Follow Google's OAuth implementation guidelines
+- **Privacy:** Comply with data privacy regulations (GDPR, CCPA)
+- **Data Minimization:** Store only necessary user information
+
+### NFR-6: Accessibility
+- **WCAG 2.1 Level AA:** Sign-in button must meet accessibility standards
+- **Keyboard Navigation:** Full keyboard support for authentication flow
+- **Screen Readers:** Proper ARIA labels and semantic HTML
+- **Color Contrast:** Sufficient contrast for button and text
+
+### NFR-7: Browser Compatibility
+- **Modern Browsers:** Support latest versions of Chrome, Firefox, Safari, Edge
+- **Mobile Browsers:** Support iOS Safari and Chrome on Android
+- **JavaScript Requirement:** Graceful messaging if JavaScript is disabled
+
+### NFR-8: Monitoring & Observability
+- **Metrics:** Track authentication success/failure rates
+- **Logging:** Log OAuth flow events without exposing sensitive data
+- **Alerting:** Alert on authentication system failures or anomalies
+- **Analytics:** Track authentication method usage patterns
+
+---
+
+## 10. Metrics & Success Criteria
+
+### Primary Metrics
+
+#### M-1: Authentication Success Rate
+- **Definition:** Percentage of successful authentication attempts
+- **Target:** ≥ 95% success rate
+- **Measurement:** (Successful authentications / Total authentication attempts) × 100
+- **Collection:** Track via backend logging
+
+#### M-2: Authentication Time
+- **Definition:** Average time from clicking "Sign in with Google" to authenticated state
+- **Target:** ≤ 4 seconds (median), ≤ 6 seconds (95th percentile)
+- **Measurement:** Track client-side timing events
+- **Collection:** Analytics platform
+
+#### M-3: Google Login Adoption Rate
+- **Definition:** Percentage of users choosing Google OAuth over traditional login
+- **Target:** ≥ 40% of new registrations within 30 days of launch
+- **Measurement:** (Google OAuth registrations / Total registrations) × 100
+- **Collection:** User registration analytics
+
+### Secondary Metrics
+
+#### M-4: Conversion Rate Impact
+- **Definition:** Registration completion rate for users who start with Google OAuth
+- **Target:** ≥ 80% completion rate
+- **Measurement:** (Completed Google registrations / Started Google registrations) × 100
+- **Collection:** Funnel analysis
+
+#### M-5: Authentication Error Rate
+- **Definition:** Percentage of authentication attempts resulting in errors
+- **Target:** ≤ 5% error rate
+- **Measurement:** (Failed attempts / Total attempts) × 100
+- **Breakdown:** Track errors by type (user denial, token validation, network, etc.)
+
+#### M-6: Time to First Login
+- **Definition:** Time from user landing on site to first authenticated session
+- **Target:** Reduce by 50% compared to traditional registration
+- **Measurement:** Compare median time for Google OAuth vs. manual registration
+
+### Long-term Success Indicators
+
+- **User Retention:** Users authenticated via Google have comparable or better retention
+- **Support Tickets:** Reduction in password-related support requests
+- **Security Incidents:** No authentication-related security breaches
+- **User Satisfaction:** Positive feedback on authentication experience
+
+---
+
+## 11. Risks & Dependencies
+
+### High-Priority Risks
+
+#### R-1: Google Service Availability
+- **Risk:** Google OAuth service outage prevents all Google-based authentication
+- **Impact:** High - Users cannot sign in during outage
+- **Mitigation:** 
+  - Display clear error message
+  - Provide alternative authentication methods
+  - Monitor Google's service status
+  - Implement circuit breaker pattern
+
+#### R-2: OAuth Configuration Errors
+- **Risk:** Incorrect OAuth configuration causes authentication failures
+- **Impact:** High - Breaks authentication for all users
+- **Mitigation:**
+  - Thorough testing in staging environment
+  - Configuration validation checks
+  - Gradual rollout with feature flags
+  - Quick rollback capability
+
+#### R-3: Token Validation Vulnerabilities
+- **Risk:** Improper token validation could allow unauthorized access
+- **Impact:** Critical - Security breach
+- **Mitigation:**
+  - Follow OAuth 2.0 security best practices
+  - Security code review
+  - Penetration testing
+  - Regular security audits
+
+### Medium-Priority Risks
+
+#### R-4: User Privacy Concerns
+- **Risk:** Users concerned about sharing Google account information
+- **Impact:** Medium - Lower adoption rate
+- **Mitigation:**
+  - Clear privacy policy
+  - Transparent permission requests
+  - Minimal scope requests
+  - Option to use traditional authentication
+
+#### R-5: Account Linking Conflicts
+- **Risk:** Complex edge cases in account linking logic
+- **Impact:** Medium - Poor user experience, support overhead
+- **Mitigation:**
+  - Comprehensive testing of linking scenarios
+  - Clear user communication
+  - Manual resolution process for edge cases
+
+### Dependencies
+
+#### D-1: Google OAuth 2.0 Service (External)
+- **Type:** External Service
+- **Status:** Available
+- **Risk:** Service changes or deprecation
+- **Owner:** Google
+- **Mitigation:** Monitor Google's developer announcements
+
+#### D-2: OAuth Client Credentials (Configuration)
+- **Type:** Configuration
+- **Status:** Required before implementation
+- **Requirements:** 
+  - Register application with Google Cloud Console
+  - Obtain client_id and client_secret
+  - Configure authorized redirect URIs
+- **Owner:** Development Team
+
+#### D-3: HTTPS/SSL Certificate (Infrastructure)
+- **Type:** Infrastructure
+- **Status:** Required (OAuth requires HTTPS)
+- **Owner:** DevOps/Infrastructure Team
+
+#### D-4: Session Management System (Internal)
+- **Type:** Internal Dependency
+- **Status:** Must be available/implemented
+- **Requirements:** Secure session storage and management
+- **Owner:** Backend Team
+
+#### D-5: User Database Schema (Internal)
+- **Type:** Internal Dependency
+- **Status:** Out of scope for v1 (per business requirements)
+- **Note:** Future versions will require database integration
+
+---
+
+## 12. Open Questions
+
+### Technical Decisions
+
+#### Q-1: Session Management Strategy
+- **Question:** Should sessions be stored server-side (Redis/database) or use stateless JWT tokens?
+- **Context:** Affects scalability and security posture
+- **Stakeholders:** Backend Team, Security Team
+- **Status:** Pending decision
+
+#### Q-2: Refresh Token Handling
+- **Question:** Should we store and use refresh tokens for long-lived sessions?
+- **Context:** Improves UX but adds complexity
+- **Impact:** Session duration and re-authentication frequency
+- **Status:** Pending decision
+
+#### Q-3: Profile Picture Storage
+- **Question:** Should we store profile pictures locally or reference Google's hosted images?
+- **Context:** Google image URLs may expire or change
+- **Impact:** Storage requirements and user experience
+- **Status:** Pending decision
+
+### Business Questions
+
+#### Q-4: Multi-Provider Priority
+- **Question:** What is the priority order for adding additional OAuth providers (Apple, Facebook)?
+- **Context:** Helps plan roadmap and architecture
+- **Stakeholders:** Product Team
+- **Status:** Explicitly out of scope for v1; future roadmap TBD
+
+#### Q-5: Account Unlinking
+- **Question:** Should users be able to unlink their Google account after connecting it?
+- **Context:** Affects account management complexity
+- **Impact:** User control and support requirements
+- **Status:** Pending decision
+
+### UX Questions
+
+#### Q-6: Button Placement
+- **Question:** Should "Sign in with Google" be primary CTA or secondary option?
+- **Context:** Affects visual hierarchy and user behavior
+- **Stakeholders:** UX/Design Team
+- **Status:** Pending design review
+
+#### Q-7: Post-Authentication Flow
+- **Question:** Where should users land after first-time Google authentication?
+- **Options:** 
+  - Onboarding flow
+  - Dashboard
+  - Original requested page
+- **Status:** Pending UX decision
+
+### Compliance Questions
+
+#### Q-8: Data Retention
+- **Question:** How long should we retain OAuth tokens and related data?
+- **Context:** Privacy compliance requirements
+- **Stakeholders:** Legal Team, Compliance Team
+- **Status:** Pending legal review
+
+#### Q-9: User Consent Management
+- **Question:** Do we need additional consent beyond Google's OAuth consent screen?
+- **Context:** GDPR and privacy regulations
+- **Status:** Pending legal review
+
+---
+
+## 13. Acceptance Criteria (AC-x)
+
+### AC-1: Google Sign-In Button Display
+**Given** a user visits the login page  
+**When** the page loads  
+**Then** a "Sign in with Google" button is visible  
+**And** the button follows Google's branding guidelines  
+**And** the button is accessible via keyboard navigation
+
+### AC-2: OAuth Flow Initiation
+**Given** a user is on the login page  
+**When** the user clicks "Sign in with Google"  
+**Then** the user is redirected to Google's OAuth consent screen  
+**And** the request includes correct OAuth parameters (client_id, redirect_uri, scope, state)  
+**And** the state parameter is securely generated and stored
+
+### AC-3: User Authorization at Google
+**Given** a user is on Google's consent screen  
+**When** the user clicks "Allow"  
+**Then** Google redirects back to the application's callback URL  
+**And** the redirect includes a valid authorization code  
+**And** the state parameter matches the original request
+
+### AC-4: New User Account Creation
+**Given** a user completes Google OAuth with an email not in the system  
+**When** the backend processes the ID token  
+**Then** a new user account is created  
+**And** the account includes email, name, and profile picture  
+**And** the email is marked as verified  
+**And** the user is authenticated and redirected to the application  
+**And** the user can access protected resources
+
+### AC-5: Existing User Authentication
+**Given** a user completes Google OAuth with an email already in the system  
+**When** the backend processes the ID token  
+**Then** the existing user account is retrieved  
+**And** the user is authenticated without creating a duplicate account  
+**And** the Google OAuth is linked to the account (if not already linked)  
+**And** the user is redirected to the application
+
+### AC-6: Token Validation
+**Given** the backend receives an ID token from Google  
+**When** validating the token  
+**Then** the token signature is verified using Google's public keys  
+**And** the issuer (iss) claim is validated as Google  
+**And** the audience (aud) claim matches the application's client_id  
+**And** the expiration (exp) claim is checked and token is not expired  
+**And** invalid tokens are rejected with appropriate error handling
+
+### AC-7: Secure Session Creation
+**Given** a user successfully authenticates via Google OAuth  
+**When** the session is created  
+**Then** a secure, HTTP-only session cookie is set  
+**And** no access tokens are exposed to client-side JavaScript  
+**And** the session includes necessary user identification  
+**And** the session expires after appropriate duration
+
+### AC-8: Logout Functionality
+**Given** an authenticated user  
+**When** the user clicks logout  
+**Then** the user's session is terminated  
+**And** session cookies are cleared  
+**And** the user is redirected to the login page  
+**And** the user cannot access protected resources without re-authenticating
+
+### AC-9: Error Handling - User Denies Permission
+**Given** a user is on Google's consent screen  
+**When** the user clicks "Cancel" or "Deny"  
+**Then** the user is redirected back to the application  
+**And** a clear, user-friendly error message is displayed  
+**And** the user is given the option to try again or use alternative authentication
+
+### AC-10: Error Handling - Invalid Token
+**Given** the backend receives an invalid or expired token  
+**When** token validation occurs  
+**Then** the authentication is rejected  
+**And** an appropriate error is logged  
+**And** the user sees a generic error message (without exposing technical details)  
+**And** the user is prompted to retry authentication
+
+### AC-11: Error Handling - Network Failure
+**Given** a network error occurs during OAuth flow  
+**When** token exchange fails  
+**Then** the error is caught and logged  
+**And** the user sees a message indicating a temporary issue  
+**And** the user is given the option to retry  
+**And** the system does not expose sensitive error details
+
+### AC-12: CSRF Protection
+**Given** any OAuth flow initiation  
+**When** generating the authorization URL  
+**Then** a unique state parameter is generated  
+**And** the state parameter is stored securely (server-side session)  
+**When** processing the callback  
+**Then** the state parameter from Google matches the stored value  
+**And** mismatched state parameters result in authentication rejection
+
+### AC-13: Account Linking
+**Given** a user with an existing email-based account  
+**When** they authenticate via Google OAuth with the same email  
+**Then** the Google OAuth is linked to their existing account  
+**And** no duplicate account is created  
+**And** the user can subsequently use either authentication method  
+**And** the user receives confirmation of successful linking
+
+### AC-14: Re-authorization After Revocation
+**Given** a user has revoked Google permissions  
+**When** they attempt to log in with Google  
+**Then** they are prompted to re-authorize  
+**And** the full OAuth consent flow is initiated  
+**And** successful re-authorization restores access
+
+### AC-15: Mobile Responsiveness
+**Given** a user accesses the login page on a mobile device  
+**When** viewing the "Sign in with Google" button  
+**Then** the button is properly sized and responsive  
+**And** the button is easily tappable (minimum 44x44 points)  
+**And** the OAuth flow works correctly on mobile browsers  
+**And** the user experience is smooth on both iOS and Android
+
+### AC-16: Loading States
+**Given** a user initiates Google OAuth  
+**When** waiting for redirect or token validation  
+**Then** appropriate loading indicators are displayed  
+**And** the user cannot trigger duplicate authentication requests  
+**And** loading states have reasonable timeout periods  
+**And** timeouts result in clear error messages
+
+### AC-17: Accessibility Compliance
+**Given** a user with assistive technology  
+**When** accessing the Google sign-in functionality  
+**Then** the button has proper ARIA labels  
+**And** the button is keyboard accessible  
+**And** screen readers can announce the button's purpose  
+**And** error messages are announced to screen readers  
+**And** the flow meets WCAG 2.1 Level AA standards
+
+---
+
+## Appendix
+
+### Related Documentation
+- [Google OAuth 2.0 Documentation](https://developers.google.com/identity/protocols/oauth2)
+- [OAuth 2.0 RFC 6749](https://tools.ietf.org/html/rfc6749)
+- [Google Identity: Best Practices](https://developers.google.com/identity/protocols/oauth2/best-practices)
+
+### Glossary
+- **OAuth 2.0:** Industry-standard protocol for authorization
+- **Authorization Code:** Temporary code exchanged for access token
+- **Access Token:** Token used to access protected resources
+- **ID Token:** JWT containing user identity information
+- **Scope:** Permissions requested from the user
+- **State Parameter:** Random value used for CSRF protection
+- **CSRF:** Cross-Site Request Forgery attack
+
+### Version History
+- **v1.0** (2026-01-07): Initial PRD created from requirement issue
+
+---
+
+**End of Document**
