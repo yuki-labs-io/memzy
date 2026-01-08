@@ -52,6 +52,7 @@ export default function AuthGuard({
     }
   }, [status, session, requireAuth, requireRole, requirePermissions, router, pathname, redirectTo]);
 
+  // Show loading fallback
   if (status === "loading") {
     return (
       fallback || (
@@ -62,10 +63,12 @@ export default function AuthGuard({
     );
   }
 
+  // Don't render anything while redirecting for unauthenticated users
   if (requireAuth && status === "unauthenticated") {
     return null;
   }
 
+  // Don't render anything while redirecting for unauthorized users
   if (status === "authenticated" && session?.user) {
     if (requireRole && !hasRole(session.user.role, requireRole)) {
       return null;

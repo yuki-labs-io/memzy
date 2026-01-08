@@ -4,13 +4,10 @@ import { UserRole, Permission } from "./roles";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
+    user: DefaultSession["user"] & {
       id: string;
       role: UserRole;
       permissions?: Permission[];
-      email: string;
-      name?: string | null;
-      image?: string | null;
     };
   }
 

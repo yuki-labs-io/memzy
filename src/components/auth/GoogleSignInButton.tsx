@@ -12,9 +12,11 @@ export default function GoogleSignInButton() {
     setIsLoading(true);
     try {
       const callbackUrl = searchParams.get("next") || "/dashboard";
+      // On successful sign-in, next-auth will typically redirect and unmount this component.
       await signIn("google", { callbackUrl });
     } catch (error) {
       console.error("Sign in error:", error);
+    } finally {
       setIsLoading(false);
     }
   };

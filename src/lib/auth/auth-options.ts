@@ -18,17 +18,29 @@ const logAuthEvent = (
   });
 };
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+if (!googleClientId) {
+  throw new Error(
+    "Missing required environment variable GOOGLE_CLIENT_ID for Google authentication."
+  );
+}
+
+if (!googleClientSecret) {
+  throw new Error(
+    "Missing required environment variable GOOGLE_CLIENT_SECRET for Google authentication."
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       authorization: {
         params: {
           scope: "openid email profile",
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
         },
       },
     }),
@@ -45,7 +57,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (!user.email) {
         logAuthEvent("auth.sign_in.denied", {
-          email: user.email || "unknown",
+          email: "Email missing",
           provider: account?.provider || "unknown",
           success: false,
         });
@@ -94,14 +106,6 @@ export const authOptions: NextAuthOptions = {
         userId: token?.id || session?.user?.id,
         email: token?.email || session?.user?.email || undefined,
       });
-    },
-    async session({ session, token }) {
-      if (!session || !token) {
-        logAuthEvent("auth.session.invalid", {
-          userId: token?.id,
-          email: token?.email || undefined,
-        });
-      }
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

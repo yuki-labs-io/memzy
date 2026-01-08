@@ -16,10 +16,7 @@ function isPublicPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isPublicPath(pathname) && !isProtectedPath(pathname)) {
-    return NextResponse.next();
-  }
-
+  // Check protected paths first
   if (isProtectedPath(pathname)) {
     const token = await getToken({
       req: request,
@@ -31,6 +28,11 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
+  }
+
+  // Allow all public paths
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();

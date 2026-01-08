@@ -40,7 +40,7 @@ export default function DashboardPage() {
                   {session?.user?.role}
                 </span>
               </p>
-              {session?.user?.permissions && session.user.permissions.length > 0 && (
+              {session?.user?.permissions && (
                 <div>
                   <p className="text-gray-600">
                     <strong>Permissions:</strong>
