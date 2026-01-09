@@ -2,7 +2,6 @@ import {
   FlashcardGenerationResult,
   FlashcardGenerationOptions,
   DEFAULT_OPTIONS,
-  Flashcard,
 } from "@/context/domain/entities/flashcard.entity";
 
 export interface LLMService {
@@ -68,7 +67,16 @@ export class OpenAIFlashcardService implements LLMService {
         throw new Error("No content received from OpenAI");
       }
 
-      const parsedResult = JSON.parse(content_text);
+      let parsedResult: any;
+      try {
+        parsedResult = JSON.parse(content_text);
+      } catch (parseError) {
+        throw new Error("Failed to parse OpenAI response as valid JSON");
+      }
+
+      if (!parsedResult.cards || !Array.isArray(parsedResult.cards)) {
+        throw new Error("Invalid response format: missing or invalid cards array");
+      }
       
       return {
         cards: parsedResult.cards.map((card: any, index: number) => ({

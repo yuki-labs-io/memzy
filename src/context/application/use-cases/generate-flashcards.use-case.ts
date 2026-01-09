@@ -26,7 +26,7 @@ export class GenerateFlashcardsUseCase {
       throw new Error("Content text is required and cannot be empty");
     }
 
-    const wordCount = input.contentText.trim().split(/\s+/).length;
+    const wordCount = input.contentText.trim().split(/\s+/).filter(Boolean).length;
 
     if (wordCount < 20) {
       throw new Error(

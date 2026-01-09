@@ -44,50 +44,27 @@ export class ContentExtractor implements ContentExtractionService {
     }
 
     const base64 = await this.fileToBase64(file);
-    
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OpenAI API key is required for image text extraction");
-    }
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await fetch("/api/image-text-extraction", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Extract all text content from this image. Return only the text content, preserving the structure and formatting as much as possible. If there is no text in the image, respond with 'NO_TEXT_FOUND'.",
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: base64,
-                  },
-                },
-              ],
-            },
-          ],
-          max_tokens: 4096,
+          image: base64,
         }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`OpenAI Vision API error: ${error.error?.message || response.statusText}`);
+        const error = await response.json().catch(() => ({ error: response.statusText }));
+        throw new Error(error.error || "Failed to extract text from image");
       }
 
       const data = await response.json();
-      const extractedText = data.choices[0]?.message?.content || "";
+      const extractedText = data.text || "";
 
-      if (extractedText === "NO_TEXT_FOUND" || extractedText.trim().length < 10) {
+      if (extractedText.trim().length < 10) {
         throw new Error(
           "Could not extract sufficient text from the image. Please ensure the image contains clear, readable text."
         );

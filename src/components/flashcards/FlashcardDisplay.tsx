@@ -57,9 +57,9 @@ export default function FlashcardDisplay({ cards, meta, onGenerateNew }: Flashca
               </span>
               {card.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {card.tags.map((tag, tagIndex) => (
+                  {card.tags.map((tag) => (
                     <span
-                      key={tagIndex}
+                      key={`${card.id}-${tag}`}
                       className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
                     >
                       {tag}
@@ -96,7 +96,7 @@ export default function FlashcardDisplay({ cards, meta, onGenerateNew }: Flashca
       <div className="mt-8 flex justify-center">
         <button
           onClick={onGenerateNew}
-          className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+          className="rounded-lg bg-blue-600 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
         >
           Generate New Flashcards
         </button>

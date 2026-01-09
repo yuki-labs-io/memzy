@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ContentExtractor } from "@/context/infrastructure/services/content-extraction.service";
 import { SourceType } from "@/context/domain/entities/flashcard.entity";
 
@@ -15,8 +15,26 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const contentExtractor = new ContentExtractor();
+  const contentExtractor = useMemo(() => new ContentExtractor(), []);
+
+  useEffect(() => {
+    setSelectedFile(null);
+    setError(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleTextSubmit = () => {
     if (!textContent.trim()) {
@@ -68,8 +86,14 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setSelectedFile(file);
       setError(null);
+      if (file.type.startsWith("image/")) {
+        setPreviewUrl(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -202,9 +226,9 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
               <p className="mb-2 text-sm text-gray-600">
                 Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
               </p>
-              {selectedFile.type.startsWith("image/") && (
+              {previewUrl && (
                 <img
-                  src={URL.createObjectURL(selectedFile)}
+                  src={previewUrl}
                   alt="Preview"
                   className="max-h-48 rounded-lg border border-gray-300"
                 />

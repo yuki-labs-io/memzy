@@ -18,6 +18,9 @@ export default function FlashcardsPage() {
     setError(null);
     setResult(null);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
     try {
       const response = await fetch("/api/flashcards/generate", {
         method: "POST",
@@ -34,7 +37,10 @@ export default function FlashcardsPage() {
             style: "qa",
           },
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -44,7 +50,16 @@ export default function FlashcardsPage() {
       const data: GenerateFlashcardsOutput = await response.json();
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      clearTimeout(timeoutId);
+      if (err instanceof Error) {
+        if (err.name === "AbortError") {
+          setError("Request timed out. The generation is taking too long. Please try with shorter content.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
