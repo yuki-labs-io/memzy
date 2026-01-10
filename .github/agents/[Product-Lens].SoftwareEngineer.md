@@ -58,12 +58,9 @@ Examples:
 docs/features/
 
 2. Every documentation file:
-- Must be in **Markdown**
-- Must be named in **lowercase kebab-case**
-- Format:
-  ```
-  docs/features/<feature-name>.md
-  ```
+    - Must be in **Markdown**
+    - Must be named in **lowercase kebab-case**
+    - Format: `docs/features/<feature-name>.md`
 
 Examples:
 docs/features/ai-flashcards-textual-generation.md
