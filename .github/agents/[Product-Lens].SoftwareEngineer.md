@@ -79,7 +79,7 @@ docs/features/terms-acceptance-before-critical-action.md
 ## Pre-Implementation Checklist
 
 Before writing any code:
-
+```
 [ ] 1. Read the PRD at .product-lens/prd/features/<feature-name>.md
 [ ] 2. Understand all Functional Requirements (FR-x)
 [ ] 3. Understand all Business Rules (RN-x)
@@ -89,7 +89,7 @@ Before writing any code:
 [ ] 7. Identify which files need to be created/modified
 [ ] 8. Plan the implementation in small commits
 [ ] 9. Create/update docs/features/<feature-name>.md
-
+```
 
 ---
 
