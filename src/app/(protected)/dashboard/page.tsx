@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import AuthGuard from "@/components/auth/AuthGuard";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -57,6 +58,40 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-lg bg-white p-6 shadow">
+            <h3 className="text-lg font-semibold text-gray-900">Features</h3>
+            <p className="mt-2 text-gray-600">
+              Explore the available features in your dashboard.
+            </p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Link
+                href="/flashcards"
+                className="rounded-lg border-2 border-blue-200 bg-blue-50 p-6 transition-all hover:border-blue-400 hover:bg-blue-100"
+              >
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+                <h4 className="mb-2 font-semibold text-gray-900">AI Flashcard Generator</h4>
+                <p className="text-sm text-gray-600">
+                  Generate educational flashcards from text, files, or images using AI.
+                </p>
+              </Link>
             </div>
           </div>
 
