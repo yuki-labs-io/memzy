@@ -5,6 +5,9 @@ import { DI_TYPES } from "./DITypes";
 import { EncryptionService, IEncryptionService } from "@/context/infrastructure/services/EncryptionService";
 import { PrismaLLMConfigRepository } from "@/context/infrastructure/repositories/PrismaLLMConfigRepository";
 import { ILLMConfigRepository } from "@/context/infrastructure/repositories/LLMConfigRepository.interface";
+import { PrismaDeckRepository } from "@/context/infrastructure/repositories/PrismaDeckRepository";
+import { IDeckRepository } from "@/context/infrastructure/repositories/DeckRepository.interface";
+import prisma from "@/lib/prisma/Client";
 
 // Adapters
 import { OpenAIAdapter } from "@/context/infrastructure/adapters/OpenAIAdapter";
@@ -19,6 +22,8 @@ import { GetLLMConfigHandler } from "@/context/application/handlers/GetLLMConfig
 import { TestConnectionHandler } from "@/context/application/handlers/TestConnection.handler";
 import { GenerateFlashcardsHandler } from "@/context/application/handlers/GenerateFlashcards.handler";
 import { ExtractImageTextHandler } from "@/context/application/handlers/ExtractImageText.handler";
+import { CreateDeckHandler } from "@/context/application/handlers/CreateDeck.handler";
+import { GetUserDecksHandler } from "@/context/application/handlers/GetUserDecks.handler";
 
 // Provider Registry Implementation
 class ProviderRegistry implements ILLMProviderRegistry {
@@ -46,6 +51,11 @@ container.registerSingleton<IEncryptionService>(
 container.registerSingleton<ILLMConfigRepository>(
   DI_TYPES.ILLMConfigRepository,
   () => new PrismaLLMConfigRepository()
+);
+
+container.registerSingleton<IDeckRepository>(
+  DI_TYPES.IDeckRepository,
+  () => new PrismaDeckRepository(prisma)
 );
 
 // Register Adapters as Singletons
@@ -110,6 +120,20 @@ container.register<ExtractImageTextHandler>(
     container.resolve<ILLMConfigRepository>(DI_TYPES.ILLMConfigRepository),
     container.resolve<ILLMProviderRegistry>(DI_TYPES.ILLMProviderRegistry),
     container.resolve<IEncryptionService>(DI_TYPES.IEncryptionService)
+  )
+);
+
+container.register<CreateDeckHandler>(
+  DI_TYPES.CreateDeckHandler,
+  () => new CreateDeckHandler(
+    container.resolve<IDeckRepository>(DI_TYPES.IDeckRepository)
+  )
+);
+
+container.register<GetUserDecksHandler>(
+  DI_TYPES.GetUserDecksHandler,
+  () => new GetUserDecksHandler(
+    container.resolve<IDeckRepository>(DI_TYPES.IDeckRepository)
   )
 );
 
