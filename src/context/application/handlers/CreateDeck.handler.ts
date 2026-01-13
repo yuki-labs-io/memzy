@@ -38,12 +38,12 @@ export class CreateDeckHandler {
     } catch (error) {
       if (error instanceof Error) {
         return NextResponse.json(
-          { error: error.message } as any,
+          { error: error.message },
           { status: 400 }
         );
       }
       return NextResponse.json(
-        { error: "Failed to create deck" } as any,
+        { error: "Failed to create deck" },
         { status: 500 }
       );
     }

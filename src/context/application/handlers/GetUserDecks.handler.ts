@@ -21,9 +21,9 @@ export class GetUserDecksHandler {
       };
 
       return NextResponse.json(response, { status: 200 });
-    } catch (error) {
+    } catch {
       return NextResponse.json(
-        { error: "Failed to fetch decks" } as any,
+        { error: "Failed to fetch decks" } as unknown as GetDecksResponseDTO,
         { status: 500 }
       );
     }

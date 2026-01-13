@@ -9,7 +9,6 @@ export interface DeckCardProps {
   tags: string[];
   createdAt: string;
   cardCount: number;
-  studiedCount: number;
   progress: number;
 }
 
@@ -20,7 +19,6 @@ export function DeckCard({
   tags,
   createdAt,
   cardCount,
-  studiedCount,
   progress,
 }: DeckCardProps) {
   const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {

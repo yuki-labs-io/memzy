@@ -97,7 +97,7 @@ export class PrismaDeckRepository implements IDeckRepository {
   }
 
   async countCardsByDeckId(
-    deckId: string
+    _deckId: string
   ): Promise<{ total: number; studied: number }> {
     // For MVP, returning 0 as flashcard integration is not in scope
     // This will be implemented when flashcards are linked to decks

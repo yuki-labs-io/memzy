@@ -1,4 +1,3 @@
-import { Deck } from "../../domain/entities/Deck.entity";
 import { IDeckRepository } from "../../infrastructure/repositories/DeckRepository.interface";
 import { DeckItemDTO } from "../dtos/Deck.dto";
 

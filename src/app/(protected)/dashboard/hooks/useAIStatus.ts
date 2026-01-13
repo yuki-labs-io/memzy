@@ -31,7 +31,7 @@ export function useAIStatus() {
         setStatus("warning");
         setProvider(undefined);
       }
-    } catch (err) {
+    } catch {
       setStatus("warning");
       setProvider(undefined);
     } finally {
