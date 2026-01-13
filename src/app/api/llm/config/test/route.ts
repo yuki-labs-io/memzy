@@ -1,16 +1,15 @@
-import { NextRequest } from "next/server";
-import { withAuth } from "@/lib/api/WithAuth";
-import { withLogging } from "@/lib/api/WithLogging";
-import { withErrorHandling } from "@/lib/api/WithErrorHandling";
+import { pipeline, createHandler } from "@/lib/api/Pipeline";
+import { withAuth, withLogging, withErrorHandler } from "@/lib/api/Middlewares";
 import { container } from "@/lib/di/Configuration";
 import { DI_TYPES } from "@/lib/di/DITypes";
 import { TestConnectionHandler } from "@/context/application/handlers/TestConnection.handler";
 
-export async function POST(req: NextRequest) {
-  const handler = container.resolve<TestConnectionHandler>(DI_TYPES.TestConnectionHandler);
-  return withAuth(
-    withLogging(
-      withErrorHandling((req, ctx) => handler.handle(req, ctx))
-    )
-  )(req, {} as any);
-}
+export const POST = pipeline(
+  withErrorHandler(),
+  withAuth(),
+  withLogging({ resource: "llm-config-test" }),
+  createHandler((req, ctx) => {
+    const handler = container.resolve<TestConnectionHandler>(DI_TYPES.TestConnectionHandler);
+    return handler.handle(req, ctx);
+  })
+);
