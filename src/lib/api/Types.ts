@@ -10,4 +10,4 @@ export type Handler<T = any> = (
   ctx: RequestContext
 ) => Promise<NextResponse<T>>;
 
-export type Middleware = (handler: Handler) => Handler;
+export type IMiddleware = (handler: Handler) => Handler;

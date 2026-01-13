@@ -1,27 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RequestContext } from "@/lib/api/Types";
-import { llmConfigRepository } from "@/context/infrastructure/repositories/PrismaLLMConfigRepository";
-import { EncryptionService } from "@/context/infrastructure/services/EncryptionService";
+import { ILLMConfigRepository } from "@/context/infrastructure/repositories/LLMConfigRepository.interface";
+import { IEncryptionService } from "@/context/infrastructure/services/EncryptionService";
 
-export async function getLLMConfigHandler(req: NextRequest, ctx: RequestContext) {
-  const { userId } = ctx;
+export class GetLLMConfigHandler {
+  constructor(
+    private readonly llmConfigRepository: ILLMConfigRepository,
+    private readonly encryptionService: IEncryptionService
+  ) {}
 
-  const settings = await llmConfigRepository.getUserLLMSettings(userId);
+  async handle(req: NextRequest, ctx: RequestContext): Promise<NextResponse> {
+    const { userId } = ctx;
 
-  if (!settings) {
+    const settings = await this.llmConfigRepository.getUserLLMSettings(userId);
+
+    if (!settings) {
+      return NextResponse.json({
+        configured: false,
+      });
+    }
+
+    const decryptedKey = this.encryptionService.decrypt(settings.apiKeyEnc);
+    const maskedKey = this.encryptionService.maskApiKey(decryptedKey);
+
     return NextResponse.json({
-      configured: false,
+      configured: true,
+      provider: settings.provider,
+      model: settings.model,
+      apiKeyMasked: maskedKey,
     });
   }
-
-  const encryptionService = new EncryptionService();
-  const decryptedKey = encryptionService.decrypt(settings.apiKeyEnc);
-  const maskedKey = encryptionService.maskApiKey(decryptedKey);
-
-  return NextResponse.json({
-    configured: true,
-    provider: settings.provider,
-    model: settings.model,
-    apiKeyMasked: maskedKey,
-  });
 }

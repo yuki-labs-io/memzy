@@ -4,7 +4,7 @@ import {
   FlashcardGenerationResult,
 } from "@/context/domain/entities/flashcard.entity";
 
-export interface LLMAdapter {
+export interface ILLMAdapter {
   testConnection(apiKey: string, model: LLMModel): Promise<void>;
   generateFlashCards(
     apiKey: string,
@@ -14,7 +14,7 @@ export interface LLMAdapter {
   ): Promise<FlashcardGenerationResult>;
 }
 
-export interface LLMProviderRegistry {
-  register(provider: LLMProvider, adapter: LLMAdapter): void;
-  resolve(provider: LLMProvider): LLMAdapter;
+export interface ILLMProviderRegistry {
+  register(provider: LLMProvider, adapter: ILLMAdapter): void;
+  resolve(provider: LLMProvider): ILLMAdapter;
 }

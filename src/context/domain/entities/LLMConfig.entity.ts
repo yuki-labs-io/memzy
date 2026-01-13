@@ -5,7 +5,7 @@ export type AnthropicModel = "claude-3.5-sonnet" | "claude-3-opus";
 
 export type LLMModel = OpenAIModel | AnthropicModel;
 
-export interface LLMConfiguration {
+export interface ILLMConfiguration {
   userId: string;
   provider: LLMProvider;
   model: LLMModel;
@@ -14,7 +14,7 @@ export interface LLMConfiguration {
   updatedAt: Date;
 }
 
-export interface LLMConfigurationInput {
+export interface ILLMConfigurationInput {
   provider: LLMProvider;
   model: LLMModel;
   apiKey: string;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Handler, Middleware } from "./Types";
+import { Handler, IMiddleware } from "./Types";
 
-export const withLogging: Middleware = (handler: Handler) => {
+export const withLogging: IMiddleware = (handler: Handler) => {
   return async (req, ctx) => {
     const startTime = Date.now();
     const route = req.nextUrl.pathname;

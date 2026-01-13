@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { Handler, Middleware } from "./Types";
+import { Handler, IMiddleware } from "./Types";
 import { DomainError } from "@/context/domain/errors/LLMErrors";
 
-export const withErrorHandling: Middleware = (handler: Handler) => {
+export const withErrorHandling: IMiddleware = (handler: Handler) => {
   return async (req, ctx) => {
     try {
       return await handler(req, ctx);

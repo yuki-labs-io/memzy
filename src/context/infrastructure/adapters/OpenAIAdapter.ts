@@ -1,4 +1,4 @@
-import { LLMAdapter } from "./LLMAdapter.interface";
+import { ILLMAdapter } from "./LLMAdapter.interface";
 import { LLMModel } from "@/context/domain/entities/LLMConfig.entity";
 import {
   FlashcardGenerationOptions,
@@ -11,7 +11,7 @@ import {
   RateLimitError,
 } from "@/context/domain/errors/LLMErrors";
 
-export class OpenAIAdapter implements LLMAdapter {
+export class OpenAIAdapter implements ILLMAdapter {
   private readonly baseUrl = "https://api.openai.com/v1";
 
   async testConnection(apiKey: string, model: LLMModel): Promise<void> {

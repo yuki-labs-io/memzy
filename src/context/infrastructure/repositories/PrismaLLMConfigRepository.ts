@@ -1,10 +1,10 @@
-import { LLMConfiguration } from "@/context/domain/entities/LLMConfig.entity";
-import { LLMConfigRepository } from "./LLMConfigRepository.interface";
+import { ILLMConfiguration } from "@/context/domain/entities/LLMConfig.entity";
+import { ILLMConfigRepository } from "./LLMConfigRepository.interface";
 import { prisma } from "@/lib/prisma/Client";
 
-export class PrismaLLMConfigRepository implements LLMConfigRepository {
+export class PrismaLLMConfigRepository implements ILLMConfigRepository {
   async upsertUserLLMSettings(
-    config: Omit<LLMConfiguration, "createdAt" | "updatedAt">
+    config: Omit<ILLMConfiguration, "createdAt" | "updatedAt">
   ): Promise<void> {
     await prisma.lLMConfiguration.upsert({
       where: {
@@ -25,7 +25,7 @@ export class PrismaLLMConfigRepository implements LLMConfigRepository {
     });
   }
 
-  async getUserLLMSettings(userId: string): Promise<LLMConfiguration | null> {
+  async getUserLLMSettings(userId: string): Promise<ILLMConfiguration | null> {
     const config = await prisma.lLMConfiguration.findUnique({
       where: {
         userId,
@@ -54,5 +54,3 @@ export class PrismaLLMConfigRepository implements LLMConfigRepository {
     });
   }
 }
-
-export const llmConfigRepository = new PrismaLLMConfigRepository();

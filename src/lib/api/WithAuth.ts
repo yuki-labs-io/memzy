@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import { Handler, Middleware, RequestContext } from "./Types";
+import { Handler, IMiddleware, RequestContext } from "./Types";
 
-export const withAuth: Middleware = (handler: Handler) => {
+export const withAuth: IMiddleware = (handler: Handler) => {
   return async (req: NextRequest, ctx: RequestContext) => {
     const session = await auth();
 

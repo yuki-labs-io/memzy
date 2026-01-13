@@ -4,7 +4,13 @@ const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
 
-export class EncryptionService {
+export interface IEncryptionService {
+  encrypt(plaintext: string): string;
+  decrypt(ciphertext: string): string;
+  maskApiKey(apiKey: string): string;
+}
+
+export class EncryptionService implements IEncryptionService {
   private key: Buffer;
 
   constructor(encryptionKey?: string) {
