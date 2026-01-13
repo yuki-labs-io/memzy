@@ -1,5 +1,5 @@
 import { pipeline, createHandler } from "@/lib/api/Pipeline";
-import { withAuth, withLogging, withErrorHandler } from "@/lib/api/Middlewares";
+import { withAuth, withLogging, withErrorHandler } from "@/lib/api/middlewares";
 import { container } from "@/lib/di/Configuration";
 import { DI_TYPES } from "@/lib/di/DITypes";
 import { SaveLLMConfigHandler } from "@/context/application/handlers/SaveLLMConfig.handler";
