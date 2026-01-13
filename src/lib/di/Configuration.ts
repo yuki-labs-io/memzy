@@ -18,6 +18,7 @@ import { SaveLLMConfigHandler } from "@/context/application/handlers/SaveLLMConf
 import { GetLLMConfigHandler } from "@/context/application/handlers/GetLLMConfig.handler";
 import { TestConnectionHandler } from "@/context/application/handlers/TestConnection.handler";
 import { GenerateFlashcardsHandler } from "@/context/application/handlers/GenerateFlashcards.handler";
+import { ExtractImageTextHandler } from "@/context/application/handlers/ExtractImageText.handler";
 
 // Provider Registry Implementation
 class ProviderRegistry implements ILLMProviderRegistry {
@@ -97,6 +98,15 @@ container.register<TestConnectionHandler>(
 container.register<GenerateFlashcardsHandler>(
   DI_TYPES.GenerateFlashcardsHandler,
   () => new GenerateFlashcardsHandler(
+    container.resolve<ILLMConfigRepository>(DI_TYPES.ILLMConfigRepository),
+    container.resolve<ILLMProviderRegistry>(DI_TYPES.ILLMProviderRegistry),
+    container.resolve<IEncryptionService>(DI_TYPES.IEncryptionService)
+  )
+);
+
+container.register<ExtractImageTextHandler>(
+  DI_TYPES.ExtractImageTextHandler,
+  () => new ExtractImageTextHandler(
     container.resolve<ILLMConfigRepository>(DI_TYPES.ILLMConfigRepository),
     container.resolve<ILLMProviderRegistry>(DI_TYPES.ILLMProviderRegistry),
     container.resolve<IEncryptionService>(DI_TYPES.IEncryptionService)

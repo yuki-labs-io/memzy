@@ -13,4 +13,5 @@ export const DI_TYPES = {
   GetLLMConfigHandler: "GetLLMConfigHandler",
   TestConnectionHandler: "TestConnectionHandler",
   GenerateFlashcardsHandler: "GenerateFlashcardsHandler",
+  ExtractImageTextHandler: "ExtractImageTextHandler",
 } as const;

@@ -12,6 +12,11 @@ export interface ILLMAdapter {
     content: string,
     options?: FlashcardGenerationOptions
   ): Promise<FlashcardGenerationResult>;
+  extractTextFromImage(
+    apiKey: string,
+    model: LLMModel,
+    imageBase64: string
+  ): Promise<string>;
 }
 
 export interface ILLMProviderRegistry {

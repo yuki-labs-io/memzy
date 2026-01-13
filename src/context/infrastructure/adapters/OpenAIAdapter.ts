@@ -153,6 +153,82 @@ export class OpenAIAdapter implements ILLMAdapter {
     }
   }
 
+  async extractTextFromImage(
+    apiKey: string,
+    model: LLMModel,
+    imageBase64: string
+  ): Promise<string> {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: "Extract all text content from this image. Return only the text content, preserving the structure and formatting as much as possible. If there is no text in the image, respond with 'NO_TEXT_FOUND'.",
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: imageBase64,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 4096,
+        }),
+      });
+
+      if (response.status === 401) {
+        throw new InvalidAPIKeyError("Invalid OpenAI API key");
+      }
+
+      if (response.status === 429) {
+        throw new RateLimitError("OpenAI rate limit exceeded. Please try again later.");
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new ProviderUnavailableError(
+          "openai",
+          `OpenAI Vision API error: ${error.error?.message || response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      const extractedText = data.choices[0]?.message?.content || "";
+
+      if (extractedText === "NO_TEXT_FOUND" || extractedText.trim().length < 10) {
+        throw new Error(
+          "Could not extract sufficient text from the image. Please ensure the image contains clear, readable text."
+        );
+      }
+
+      return extractedText;
+    } catch (error) {
+      if (
+        error instanceof InvalidAPIKeyError ||
+        error instanceof RateLimitError ||
+        error instanceof ProviderUnavailableError
+      ) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new Error(`Failed to extract text from image: ${error.message}`);
+      }
+      throw new Error("Failed to extract text from image: Unknown error");
+    }
+  }
+
   private buildPrompt(content: string, options: Required<FlashcardGenerationOptions>): string {
     const styleInstructions =
       options.style === "qa"

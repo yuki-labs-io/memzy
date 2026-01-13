@@ -163,6 +163,97 @@ export class AnthropicAdapter implements ILLMAdapter {
     }
   }
 
+  async extractTextFromImage(
+    apiKey: string,
+    model: LLMModel,
+    imageBase64: string
+  ): Promise<string> {
+    try {
+      const mediaType = this.getMediaTypeFromBase64(imageBase64);
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+
+      const response = await fetch(`${this.baseUrl}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: this.mapModelToAnthropicId(model),
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: mediaType,
+                    data: base64Data,
+                  },
+                },
+                {
+                  type: "text",
+                  text: "Extract all text content from this image. Return only the text content, preserving the structure and formatting as much as possible. If there is no text in the image, respond with 'NO_TEXT_FOUND'.",
+                },
+              ],
+            },
+          ],
+        }),
+      });
+
+      if (response.status === 401) {
+        throw new InvalidAPIKeyError("Invalid Anthropic API key");
+      }
+
+      if (response.status === 429) {
+        throw new RateLimitError("Anthropic rate limit exceeded. Please try again later.");
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new ProviderUnavailableError(
+          "anthropic",
+          `Anthropic Vision API error: ${error.error?.message || response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      const extractedText = data.content?.[0]?.text || "";
+
+      if (extractedText === "NO_TEXT_FOUND" || extractedText.trim().length < 10) {
+        throw new Error(
+          "Could not extract sufficient text from the image. Please ensure the image contains clear, readable text."
+        );
+      }
+
+      return extractedText;
+    } catch (error) {
+      if (
+        error instanceof InvalidAPIKeyError ||
+        error instanceof RateLimitError ||
+        error instanceof ProviderUnavailableError
+      ) {
+        throw error;
+      }
+      if (error instanceof Error) {
+        throw new Error(`Failed to extract text from image: ${error.message}`);
+      }
+      throw new Error("Failed to extract text from image: Unknown error");
+    }
+  }
+
+  private getMediaTypeFromBase64(base64: string): string {
+    if (base64.startsWith("data:image/png")) return "image/png";
+    if (base64.startsWith("data:image/jpeg")) return "image/jpeg";
+    if (base64.startsWith("data:image/jpg")) return "image/jpeg";
+    if (base64.startsWith("data:image/gif")) return "image/gif";
+    if (base64.startsWith("data:image/webp")) return "image/webp";
+    return "image/jpeg";
+  }
+
   private mapModelToAnthropicId(model: LLMModel): string {
     const modelMap: Record<string, string> = {
       "claude-3.5-sonnet": "claude-3-5-sonnet-20241022",
