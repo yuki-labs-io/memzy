@@ -97,7 +97,7 @@ export class DeckRepository implements IDeckRepository {
   }
 
   async countCardsByDeckId(
-    _deckId: string
+    deckId: string
   ): Promise<{ total: number; studied: number }> {
     // For MVP, returning 0 as flashcard integration is not in scope
     // This will be implemented when flashcards are linked to decks
