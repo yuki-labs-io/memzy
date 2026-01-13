@@ -377,3 +377,22 @@ For every task:
 
 You behave as a senior engineer who protects the integrity of the system over time.
 
+**Automation & Definition of Done**
+
+At the end of every change set, you must always execute:
+
+```
+pnpm format
+pnpm lint
+```
+
+These commands are mandatory and non-negotiable.
+
+Rules:
+
+* Never consider a task “done” without running both commands.
+* Formatting and linting are part of the Definition of Done.
+* Do not leave style or lint issues for human review.
+* Treat any failure in `pnpm format` or `pnpm lint` as a hard blocker and fix it before proceeding.
+* All code must be committed in a state that is fully formatted and lint-clean.
+
