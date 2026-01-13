@@ -1,4 +1,5 @@
-import * as ProgressPrimitive from "@radix-ui/react-progress";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface ProgressBarProps {
   progress: number;
@@ -18,22 +19,17 @@ export function ProgressBar({ progress, className = "" }: ProgressBarProps) {
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={cn("w-full", className)}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-sm font-medium text-gray-700">Progress</span>
         <span className="text-sm font-medium text-gray-700">
           {clampedProgress.toFixed(0)}%
         </span>
       </div>
-      <ProgressPrimitive.Root
+      <Progress 
         value={clampedProgress}
-        className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200"
-      >
-        <ProgressPrimitive.Indicator
-          className={`h-full transition-all duration-300 ${indicatorColorClass}`}
-          style={{ transform: `translateX(-${100 - clampedProgress}%)` }}
-        />
-      </ProgressPrimitive.Root>
+        className={cn("[&>div]:transition-all [&>div]:duration-300", `[&>div]:${indicatorColorClass}`)}
+      />
     </div>
   );
 }
