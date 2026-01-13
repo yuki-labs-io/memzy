@@ -4,33 +4,38 @@ import { useState, useEffect, useCallback } from "react";
 
 type AIStatus = "configured" | "warning" | "not-configured";
 
+interface StatusResult {
+  status: AIStatus;
+  provider?: string;
+}
+
 export function useAIStatus() {
   const [status, setStatus] = useState<AIStatus>("not-configured");
   const [provider, setProvider] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
+
+  const determineStatus = (response: Response, data?: { provider?: string }): StatusResult => {
+    if (response.ok && data?.provider) {
+      return { status: "configured", provider: data.provider };
+    }
+    
+    if (response.status === 404) {
+      return { status: "not-configured" };
+    }
+    
+    return { status: "warning" };
+  };
 
   const checkStatus = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const response = await fetch("/api/llm/config");
+      const data = response.ok ? await response.json() : undefined;
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.provider) {
-          setStatus("configured");
-          setProvider(data.provider);
-        } else {
-          setStatus("not-configured");
-          setProvider(undefined);
-        }
-      } else if (response.status === 404) {
-        setStatus("not-configured");
-        setProvider(undefined);
-      } else {
-        setStatus("warning");
-        setProvider(undefined);
-      }
+      const result = determineStatus(response, data);
+      setStatus(result.status);
+      setProvider(result.provider);
     } catch {
       setStatus("warning");
       setProvider(undefined);

@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { IDeckRepository } from "./DeckRepository.interface";
 import { Deck } from "../../domain/entities/Deck.entity";
 
-export class PrismaDeckRepository implements IDeckRepository {
+export class DeckRepository implements IDeckRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async findByUserId(userId: string): Promise<Deck[]> {

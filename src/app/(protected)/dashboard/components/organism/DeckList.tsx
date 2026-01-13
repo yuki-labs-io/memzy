@@ -1,4 +1,5 @@
 import { DeckCard, DeckCardProps } from "../molecule/DeckCard";
+import { List } from "@/components/ui/list";
 
 interface DeckListProps {
   decks: DeckCardProps[];
@@ -6,10 +7,11 @@ interface DeckListProps {
 
 export function DeckList({ decks }: DeckListProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {decks.map((deck) => (
-        <DeckCard key={deck.id} {...deck} />
-      ))}
-    </div>
+    <List
+      items={decks}
+      renderItem={(deck) => <DeckCard {...deck} />}
+      keyExtractor={(deck) => deck.id}
+      columns={{ sm: 1, md: 2, lg: 3 }}
+    />
   );
 }

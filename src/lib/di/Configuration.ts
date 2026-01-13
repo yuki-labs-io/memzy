@@ -5,7 +5,7 @@ import { DI_TYPES } from "./DITypes";
 import { EncryptionService, IEncryptionService } from "@/context/infrastructure/services/EncryptionService";
 import { PrismaLLMConfigRepository } from "@/context/infrastructure/repositories/PrismaLLMConfigRepository";
 import { ILLMConfigRepository } from "@/context/infrastructure/repositories/LLMConfigRepository.interface";
-import { PrismaDeckRepository } from "@/context/infrastructure/repositories/PrismaDeckRepository";
+import { DeckRepository } from "@/context/infrastructure/repositories/DeckRepository";
 import { IDeckRepository } from "@/context/infrastructure/repositories/DeckRepository.interface";
 import prisma from "@/lib/prisma/Client";
 
@@ -53,9 +53,9 @@ container.registerSingleton<ILLMConfigRepository>(
   () => new PrismaLLMConfigRepository()
 );
 
-container.registerSingleton<IDeckRepository>(
+container.register<IDeckRepository>(
   DI_TYPES.IDeckRepository,
-  () => new PrismaDeckRepository(prisma)
+  () => new DeckRepository(prisma)
 );
 
 // Register Adapters as Singletons

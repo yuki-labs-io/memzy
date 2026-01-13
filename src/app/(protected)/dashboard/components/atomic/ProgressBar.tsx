@@ -1,3 +1,5 @@
+import * as ProgressPrimitive from "@radix-ui/react-progress";
+
 interface ProgressBarProps {
   progress: number;
   className?: string;
@@ -6,13 +8,13 @@ interface ProgressBarProps {
 export function ProgressBar({ progress, className = "" }: ProgressBarProps) {
   const clampedProgress = Math.min(100, Math.max(0, progress));
   
-  let colorClass = "bg-red-500";
+  let indicatorColorClass = "bg-red-500";
   if (clampedProgress === 100) {
-    colorClass = "bg-green-500";
+    indicatorColorClass = "bg-green-500";
   } else if (clampedProgress >= 76) {
-    colorClass = "bg-blue-500";
+    indicatorColorClass = "bg-blue-500";
   } else if (clampedProgress >= 26) {
-    colorClass = "bg-yellow-500";
+    indicatorColorClass = "bg-yellow-500";
   }
 
   return (
@@ -23,12 +25,15 @@ export function ProgressBar({ progress, className = "" }: ProgressBarProps) {
           {clampedProgress.toFixed(0)}%
         </span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className={`h-2.5 rounded-full transition-all duration-300 ${colorClass}`}
-          style={{ width: `${clampedProgress}%` }}
-        ></div>
-      </div>
+      <ProgressPrimitive.Root
+        value={clampedProgress}
+        className="relative h-2 w-full overflow-hidden rounded-full bg-gray-200"
+      >
+        <ProgressPrimitive.Indicator
+          className={`h-full transition-all duration-300 ${indicatorColorClass}`}
+          style={{ transform: `translateX(-${100 - clampedProgress}%)` }}
+        />
+      </ProgressPrimitive.Root>
     </div>
   );
 }
