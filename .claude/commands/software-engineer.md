@@ -433,3 +433,23 @@ Rules:
 * Treat any failure in `pnpm format` or `pnpm lint` as a hard blocker and fix it before proceeding.
 * All code must be committed in a state that is fully formatted and lint-clean.
 
+**Styling Rules**
+
+* All styling must use **CSS Modules** according to the Next.js App Router specification:
+  [https://nextjs.org/docs/14/app/building-your-application/styling/css-modules](https://nextjs.org/docs/14/app/building-your-application/styling/css-modules)
+
+* Global CSS is allowed only in `globals.css`.
+  Component-level styles must always be implemented using `*.module.css` files.
+
+* Every `*.module.css` file must include a reference to `globals.css` using `@reference` with the correct relative path. Example:
+
+```css
+@reference "../../globals.css";
+```
+
+Rules:
+
+* Never use inline styles or ad-hoc global CSS for components.
+* Never create non-module CSS files outside `globals.css`.
+* Every component-specific style must live in a `*.module.css` file.
+* The `@reference` to `globals.css` is mandatory in every module file to ensure consistency with the global design system.

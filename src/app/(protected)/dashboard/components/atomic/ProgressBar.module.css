@@ -1,3 +1,5 @@
+@reference "../../../../globals.css";
+
 .progressIndicatorRed {
   @apply bg-red-500;
 }

@@ -7,7 +7,9 @@ import { PrismaLLMConfigRepository } from "@/context/infrastructure/repositories
 import { ILLMConfigRepository } from "@/context/infrastructure/repositories/LLMConfigRepository.interface";
 import { DeckRepository } from "@/context/infrastructure/repositories/DeckRepository";
 import { IDeckRepository } from "@/context/infrastructure/repositories/DeckRepository.interface";
-import prisma from "@/lib/prisma/Client";
+import { UserRepository } from "@/context/infrastructure/repositories/UserRepository";
+import { IUserRepository } from "@/context/infrastructure/repositories/UserRepository.interface";
+import { prisma } from "@/lib/prisma/Client";
 
 // Adapters
 import { OpenAIAdapter } from "@/context/infrastructure/adapters/OpenAIAdapter";
@@ -56,6 +58,11 @@ container.registerSingleton<ILLMConfigRepository>(
 container.register<IDeckRepository>(
   DI_TYPES.IDeckRepository,
   () => new DeckRepository(prisma)
+);
+
+container.registerSingleton<IUserRepository>(
+  DI_TYPES.IUserRepository,
+  () => new UserRepository(prisma)
 );
 
 // Register Adapters as Singletons

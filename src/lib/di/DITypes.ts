@@ -4,6 +4,7 @@ export const DI_TYPES = {
   ILLMConfigRepository: "ILLMConfigRepository",
   ILLMProviderRegistry: "ILLMProviderRegistry",
   IDeckRepository: "IDeckRepository",
+  IUserRepository: "IUserRepository",
   
   // Adapters
   IOpenAIAdapter: "IOpenAIAdapter",
