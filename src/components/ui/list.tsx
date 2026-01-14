@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import styles from "./list.module.css"
 
 interface ListProps<T> extends React.HTMLAttributes<HTMLDivElement> {
   items: T[];
@@ -34,20 +35,24 @@ function List<T>({
     return <div>{emptyState}</div>;
   }
 
-  const gridCols = {
-    sm: `grid-cols-${columns.sm || 1}`,
-    md: `md:grid-cols-${columns.md || 2}`,
-    lg: `lg:grid-cols-${columns.lg || 3}`,
+  const getGridColClass = (size: number | undefined, prefix: '' | 'md' | 'lg'): string => {
+    const cols = size || (prefix === '' ? 1 : prefix === 'md' ? 2 : 3);
+    const styleKey = prefix ? `${prefix}GridCols${cols}` : `gridCols${cols}`;
+    return styles[styleKey as keyof typeof styles] || '';
   };
+
+  const gridColClasses = [
+    getGridColClass(columns.sm, ''),
+    getGridColClass(columns.md, 'md'),
+    getGridColClass(columns.lg, 'lg'),
+  ];
 
   return (
     <div
       data-slot="list"
       className={cn(
         "grid gap-6",
-        gridCols.sm,
-        gridCols.md,
-        gridCols.lg,
+        ...gridColClasses,
         className
       )}
       {...props}

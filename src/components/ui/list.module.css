@@ -1,0 +1,71 @@
+.gridCols1 {
+  @apply grid-cols-1;
+}
+
+.gridCols2 {
+  @apply grid-cols-2;
+}
+
+.gridCols3 {
+  @apply grid-cols-3;
+}
+
+.gridCols4 {
+  @apply grid-cols-4;
+}
+
+.gridCols5 {
+  @apply grid-cols-5;
+}
+
+.gridCols6 {
+  @apply grid-cols-6;
+}
+
+.mdGridCols1 {
+  @apply md:grid-cols-1;
+}
+
+.mdGridCols2 {
+  @apply md:grid-cols-2;
+}
+
+.mdGridCols3 {
+  @apply md:grid-cols-3;
+}
+
+.mdGridCols4 {
+  @apply md:grid-cols-4;
+}
+
+.mdGridCols5 {
+  @apply md:grid-cols-5;
+}
+
+.mdGridCols6 {
+  @apply md:grid-cols-6;
+}
+
+.lgGridCols1 {
+  @apply lg:grid-cols-1;
+}
+
+.lgGridCols2 {
+  @apply lg:grid-cols-2;
+}
+
+.lgGridCols3 {
+  @apply lg:grid-cols-3;
+}
+
+.lgGridCols4 {
+  @apply lg:grid-cols-4;
+}
+
+.lgGridCols5 {
+  @apply lg:grid-cols-5;
+}
+
+.lgGridCols6 {
+  @apply lg:grid-cols-6;
+}

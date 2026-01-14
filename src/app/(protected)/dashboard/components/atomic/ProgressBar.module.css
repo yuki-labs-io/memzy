@@ -1,0 +1,15 @@
+.progressIndicatorRed {
+  @apply bg-red-500;
+}
+
+.progressIndicatorYellow {
+  @apply bg-yellow-500;
+}
+
+.progressIndicatorBlue {
+  @apply bg-blue-500;
+}
+
+.progressIndicatorGreen {
+  @apply bg-green-500;
+}

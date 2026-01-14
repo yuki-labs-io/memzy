@@ -1,5 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import styles from "./ProgressBar.module.css";
 
 interface ProgressBarProps {
   progress: number;
@@ -9,13 +10,13 @@ interface ProgressBarProps {
 export function ProgressBar({ progress, className = "" }: ProgressBarProps) {
   const clampedProgress = Math.min(100, Math.max(0, progress));
   
-  let indicatorColorClass = "bg-red-500";
+  let indicatorColorClass = styles.progressIndicatorRed;
   if (clampedProgress === 100) {
-    indicatorColorClass = "bg-green-500";
+    indicatorColorClass = styles.progressIndicatorGreen;
   } else if (clampedProgress >= 76) {
-    indicatorColorClass = "bg-blue-500";
+    indicatorColorClass = styles.progressIndicatorBlue;
   } else if (clampedProgress >= 26) {
-    indicatorColorClass = "bg-yellow-500";
+    indicatorColorClass = styles.progressIndicatorYellow;
   }
 
   return (
