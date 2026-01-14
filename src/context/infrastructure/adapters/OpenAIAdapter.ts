@@ -4,7 +4,7 @@ import {
   FlashcardGenerationOptions,
   FlashcardGenerationResult,
   DEFAULT_OPTIONS,
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 import {
   InvalidAPIKeyError,
   ProviderUnavailableError,

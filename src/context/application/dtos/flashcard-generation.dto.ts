@@ -1,7 +1,7 @@
 import {
   SourceType,
   FlashcardGenerationOptions,
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 
 export interface GenerateFlashcardsInput {
   sourceType: SourceType;

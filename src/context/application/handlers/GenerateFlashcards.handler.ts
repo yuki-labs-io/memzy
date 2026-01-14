@@ -10,7 +10,7 @@ import {
   CARD_COUNT_MAX, 
   CONTENT_MIN_CHARS, 
   CONTENT_MAX_CHARS 
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 
 export class GenerateFlashcardsHandler {
   constructor(

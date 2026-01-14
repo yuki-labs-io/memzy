@@ -2,7 +2,7 @@ import {
   FlashcardGenerationResult,
   FlashcardGenerationOptions,
   DEFAULT_OPTIONS,
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 
 export interface LLMService {
   generateFlashcards(

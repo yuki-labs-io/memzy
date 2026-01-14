@@ -5,7 +5,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import FlashcardInput from "@/components/flashcards/FlashcardInput";
 import FlashcardDisplay from "@/components/flashcards/FlashcardDisplay";
 import GenerationProgress, { GenerationStep } from "@/components/flashcards/GenerationProgress";
-import { SourceType, FlashcardGenerationOptions } from "@/context/domain/entities/flashcard.entity";
+import { SourceType, FlashcardGenerationOptions } from "@/context/domain/entities/Flashcard.entity";
 import { GenerateFlashcardsOutput } from "@/context/application/dtos/flashcard-generation.dto";
 import Link from "next/link";
 

@@ -2,7 +2,7 @@ import { LLMModel, LLMProvider } from "@/context/domain/entities/LLMConfig.entit
 import {
   FlashcardGenerationOptions,
   FlashcardGenerationResult,
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 
 export interface ILLMAdapter {
   testConnection(apiKey: string, model: LLMModel): Promise<void>;

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { ContentExtractor } from "@/context/infrastructure/services/content-extraction.service";
-import { SourceType, FlashcardGenerationOptions, CONTENT_MIN_CHARS } from "@/context/domain/entities/flashcard.entity";
+import { SourceType, FlashcardGenerationOptions, CONTENT_MIN_CHARS } from "@/context/domain/entities/Flashcard.entity";
 import GenerationConfig, { GenerationConfiguration } from "./GenerationConfig";
 
 interface FlashcardInputProps {
