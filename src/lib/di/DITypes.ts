@@ -3,6 +3,7 @@ export const DI_TYPES = {
   IEncryptionService: "IEncryptionService",
   ILLMConfigRepository: "ILLMConfigRepository",
   ILLMProviderRegistry: "ILLMProviderRegistry",
+  IDeckRepository: "IDeckRepository",
   
   // Adapters
   IOpenAIAdapter: "IOpenAIAdapter",
@@ -14,4 +15,6 @@ export const DI_TYPES = {
   TestConnectionHandler: "TestConnectionHandler",
   GenerateFlashcardsHandler: "GenerateFlashcardsHandler",
   ExtractImageTextHandler: "ExtractImageTextHandler",
+  CreateDeckHandler: "CreateDeckHandler",
+  GetUserDecksHandler: "GetUserDecksHandler",
 } as const;
