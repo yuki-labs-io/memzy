@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { ContentExtractor } from "@/context/infrastructure/services/content-extraction.service";
-import { SourceType } from "@/context/domain/entities/flashcard.entity";
+import { SourceType, FlashcardGenerationOptions, CONTENT_MIN_CHARS } from "@/context/domain/entities/flashcard.entity";
+import GenerationConfig, { GenerationConfiguration } from "./GenerationConfig";
 
 interface FlashcardInputProps {
-  onGenerate: (contentText: string, sourceType: SourceType) => void;
+  onGenerate: (contentText: string, sourceType: SourceType, options: FlashcardGenerationOptions) => void;
   isLoading: boolean;
 }
 
@@ -16,8 +17,17 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
   const [error, setError] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [config, setConfig] = useState<GenerationConfiguration>({
+    cardCount: 10,
+    focusTypes: ["definitions"],
+    language: "en",
+  });
 
   const contentExtractor = useMemo(() => new ContentExtractor(), []);
+
+  const handleConfigChange = useCallback((newConfig: GenerationConfiguration) => {
+    setConfig(newConfig);
+  }, []);
 
   useEffect(() => {
     setSelectedFile(null);
@@ -26,6 +36,7 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
@@ -41,8 +52,16 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
       setError("Please enter some text content");
       return;
     }
+    if (textContent.trim().length < CONTENT_MIN_CHARS) {
+      setError(`Please provide at least ${CONTENT_MIN_CHARS} characters`);
+      return;
+    }
     setError(null);
-    onGenerate(textContent, "text");
+    onGenerate(textContent, "text", {
+      cardCount: config.cardCount,
+      focusTypes: config.focusTypes,
+      language: config.language,
+    });
   };
 
   const handleFileSubmit = async () => {
@@ -56,7 +75,16 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
 
     try {
       const extractedText = await contentExtractor.extractTextFromFile(selectedFile);
-      onGenerate(extractedText, "file");
+      if (extractedText.trim().length < CONTENT_MIN_CHARS) {
+        setError(`Extracted text is too short. Please provide content with at least ${CONTENT_MIN_CHARS} characters`);
+        setIsExtracting(false);
+        return;
+      }
+      onGenerate(extractedText, "file", {
+        cardCount: config.cardCount,
+        focusTypes: config.focusTypes,
+        language: config.language,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to extract text from file");
     } finally {
@@ -75,7 +103,16 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
 
     try {
       const extractedText = await contentExtractor.extractTextFromImage(selectedFile);
-      onGenerate(extractedText, "image");
+      if (extractedText.trim().length < CONTENT_MIN_CHARS) {
+        setError(`Extracted text is too short. Please provide an image with at least ${CONTENT_MIN_CHARS} characters of text`);
+        setIsExtracting(false);
+        return;
+      }
+      onGenerate(extractedText, "image", {
+        cardCount: config.cardCount,
+        focusTypes: config.focusTypes,
+        language: config.language,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to extract text from image");
     } finally {
@@ -98,11 +135,15 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
   };
 
   const isProcessing = isLoading || isExtracting;
+  const charCount = textContent.trim().length;
+  const isContentValid = charCount >= CONTENT_MIN_CHARS;
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <div className="flex border-b border-gray-200">
+    <div className="w-full space-y-8">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Step 1: Provide Content</h3>
+        <div className="mb-6">
+          <div className="flex border-b border-gray-200">
           <button
             className={`px-6 py-3 font-medium ${
               activeTab === "text"
@@ -149,7 +190,7 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
       {activeTab === "text" && (
         <div>
           <label htmlFor="text-content" className="mb-2 block text-sm font-medium text-gray-700">
-            Enter your content (minimum 20 words, maximum 5000 words)
+            Enter your content (minimum {CONTENT_MIN_CHARS} characters)
           </label>
           <textarea
             id="text-content"
@@ -160,16 +201,14 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
             onChange={(e) => setTextContent(e.target.value)}
             disabled={isProcessing}
           />
-          <div className="mt-2 text-sm text-gray-500">
-            Word count: {textContent.trim().split(/\s+/).filter(Boolean).length}
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className={charCount >= CONTENT_MIN_CHARS ? "text-green-600" : "text-gray-500"}>
+              Character count: {charCount} {isContentValid && "✓"}
+            </span>
+            {!isContentValid && charCount > 0 && (
+              <span className="text-amber-600">Need {CONTENT_MIN_CHARS - charCount} more characters</span>
+            )}
           </div>
-          <button
-            onClick={handleTextSubmit}
-            disabled={isProcessing || !textContent.trim()}
-            className="mt-4 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Generating Flashcards..." : "Generate Flashcards"}
-          </button>
         </div>
       )}
 
@@ -194,13 +233,6 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
               Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
             </p>
           )}
-          <button
-            onClick={handleFileSubmit}
-            disabled={isProcessing || !selectedFile}
-            className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isExtracting ? "Extracting Text..." : isLoading ? "Generating Flashcards..." : "Generate Flashcards"}
-          </button>
         </div>
       )}
 
@@ -235,15 +267,42 @@ export default function FlashcardInput({ onGenerate, isLoading }: FlashcardInput
               )}
             </div>
           )}
-          <button
-            onClick={handleImageSubmit}
-            disabled={isProcessing || !selectedFile}
-            className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isExtracting ? "Extracting Text from Image..." : isLoading ? "Generating Flashcards..." : "Generate Flashcards"}
-          </button>
         </div>
       )}
+      </div>
+
+      <div className="border-t border-gray-200 pt-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Step 2: Configure Generation</h3>
+        <GenerationConfig onConfigChange={handleConfigChange} disabled={isProcessing} />
+      </div>
+
+      <div className="border-t border-gray-200 pt-8">
+        <button
+          onClick={() => {
+            if (activeTab === "text") handleTextSubmit();
+            else if (activeTab === "file") handleFileSubmit();
+            else handleImageSubmit();
+          }}
+          disabled={
+            isProcessing ||
+            (activeTab === "text" && (!textContent.trim() || !isContentValid)) ||
+            ((activeTab === "file" || activeTab === "image") && !selectedFile) ||
+            config.focusTypes.length === 0
+          }
+          className="w-full rounded-lg bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+        >
+          {isExtracting
+            ? "Extracting Content..."
+            : isLoading
+              ? "Generating Flashcards..."
+              : "Generate Flashcards"}
+        </button>
+        {config.focusTypes.length === 0 && (
+          <p className="mt-2 text-sm text-amber-600 text-center">
+            Please select at least one focus type
+          </p>
+        )}
+      </div>
     </div>
   );
 }

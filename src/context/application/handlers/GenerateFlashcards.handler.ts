@@ -5,6 +5,12 @@ import { ILLMConfigRepository } from "@/context/infrastructure/repositories/LLMC
 import { LLMNotConfiguredError } from "@/context/domain/errors/LLMErrors";
 import { ILLMProviderRegistry } from "@/context/infrastructure/adapters/LLMAdapter.interface";
 import { IEncryptionService } from "@/context/infrastructure/services/EncryptionService";
+import { 
+  CARD_COUNT_MIN, 
+  CARD_COUNT_MAX, 
+  CONTENT_MIN_CHARS, 
+  CONTENT_MAX_CHARS 
+} from "@/context/domain/entities/flashcard.entity";
 
 export class GenerateFlashcardsHandler {
   constructor(
@@ -24,29 +30,36 @@ export class GenerateFlashcardsHandler {
       );
     }
 
-    const wordCount = body.contentText.trim().split(/\s+/).filter(Boolean).length;
+    const contentLength = body.contentText.trim().length;
 
-    if (wordCount < 20) {
+    if (contentLength < CONTENT_MIN_CHARS) {
       return NextResponse.json(
-        { error: "Content is too short. Please provide at least 20 words for flashcard generation." },
+        { error: `Content is too short. Please provide at least ${CONTENT_MIN_CHARS} characters.` },
         { status: 400 }
       );
     }
 
-    if (wordCount > 5000) {
+    if (contentLength > CONTENT_MAX_CHARS) {
       return NextResponse.json(
-        { error: "Content is too long. Please limit your content to 5000 words or less." },
+        { error: `Content is too long. Please limit your content to ${CONTENT_MAX_CHARS} characters or less.` },
         { status: 400 }
       );
     }
 
     if (body.options?.cardCount) {
-      if (body.options.cardCount < 5 || body.options.cardCount > 30) {
+      if (body.options.cardCount < CARD_COUNT_MIN || body.options.cardCount > CARD_COUNT_MAX) {
         return NextResponse.json(
-          { error: "Card count must be between 5 and 30" },
+          { error: `Card count must be between ${CARD_COUNT_MIN} and ${CARD_COUNT_MAX}` },
           { status: 400 }
         );
       }
+    }
+
+    if (body.options?.focusTypes && body.options.focusTypes.length === 0) {
+      return NextResponse.json(
+        { error: "At least one focus type must be selected" },
+        { status: 400 }
+      );
     }
 
     const settings = await this.llmConfigRepository.getUserLLMSettings(userId);
