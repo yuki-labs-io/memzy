@@ -4,7 +4,8 @@ import { useState } from "react";
 import AuthGuard from "@/components/auth/AuthGuard";
 import FlashcardInput from "@/components/flashcards/FlashcardInput";
 import FlashcardDisplay from "@/components/flashcards/FlashcardDisplay";
-import { SourceType } from "@/context/domain/entities/flashcard.entity";
+import GenerationProgress, { GenerationStep } from "@/components/flashcards/GenerationProgress";
+import { SourceType, FlashcardGenerationOptions } from "@/context/domain/entities/Flashcard.entity";
 import { GenerateFlashcardsOutput } from "@/context/application/dtos/flashcard-generation.dto";
 import Link from "next/link";
 
@@ -12,14 +13,34 @@ export default function FlashcardsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateFlashcardsOutput | null>(null);
+  const [currentStep, setCurrentStep] = useState<GenerationStep>("reading");
 
-  const handleGenerate = async (contentText: string, sourceType: SourceType) => {
+  const simulateSteps = async () => {
+    setCurrentStep("reading");
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    setCurrentStep("extracting");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    
+    setCurrentStep("generating");
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    
+    setCurrentStep("finalizing");
+  };
+
+  const handleGenerate = async (
+    contentText: string,
+    sourceType: SourceType,
+    options: FlashcardGenerationOptions
+  ) => {
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+    const stepsPromise = simulateSteps();
 
     try {
       const response = await fetch("/api/flashcards/generate", {
@@ -30,12 +51,7 @@ export default function FlashcardsPage() {
         body: JSON.stringify({
           sourceType,
           contentText,
-          options: {
-            language: "pt-BR",
-            cardCount: 12,
-            difficulty: "basic",
-            style: "qa",
-          },
+          options,
         }),
         signal: controller.signal,
       });
@@ -47,8 +63,11 @@ export default function FlashcardsPage() {
         throw new Error(errorData.error || "Failed to generate flashcards");
       }
 
+      await stepsPromise;
+
       const data: GenerateFlashcardsOutput = await response.json();
       setResult(data);
+      setCurrentStep("complete");
     } catch (err) {
       clearTimeout(timeoutId);
       if (err instanceof Error) {
@@ -68,6 +87,7 @@ export default function FlashcardsPage() {
   const handleGenerateNew = () => {
     setResult(null);
     setError(null);
+    setCurrentStep("reading");
   };
 
   return (
@@ -94,7 +114,7 @@ export default function FlashcardsPage() {
               Generate Flashcards from Your Content
             </h2>
             <p className="mt-2 text-gray-600">
-              Upload text, a file, or an image, and let AI create educational flashcards for you.
+              Upload text, a file, or an image, configure your preferences, and let AI create educational flashcards for you.
             </p>
           </div>
 
@@ -124,6 +144,12 @@ export default function FlashcardsPage() {
             </div>
           )}
 
+          {isLoading && (
+            <div className="mb-6">
+              <GenerationProgress currentStep={currentStep} />
+            </div>
+          )}
+
           <div className="rounded-lg bg-white p-6 shadow">
             {!result ? (
               <FlashcardInput onGenerate={handleGenerate} isLoading={isLoading} />
@@ -135,16 +161,6 @@ export default function FlashcardsPage() {
               />
             )}
           </div>
-
-          {isLoading && (
-            <div className="mt-6 rounded-lg bg-blue-50 p-6 text-center">
-              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-              <p className="text-blue-900 font-medium">Generating flashcards...</p>
-              <p className="mt-2 text-sm text-blue-700">
-                This may take a few seconds. Please wait.
-              </p>
-            </div>
-          )}
         </main>
       </div>
     </AuthGuard>

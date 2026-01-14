@@ -21,17 +21,25 @@ export interface FlashcardGenerationResult {
 export type SourceType = "text" | "file" | "image";
 export type Difficulty = "basic" | "intermediate" | "advanced";
 export type CardStyle = "qa" | "concept";
+export type FocusType = "definitions" | "qa" | "dates" | "vocabulary";
 
 export interface FlashcardGenerationOptions {
   language?: string;
   cardCount?: number;
   difficulty?: Difficulty;
   style?: CardStyle;
+  focusTypes?: FocusType[];
 }
 
 export const DEFAULT_OPTIONS: Required<FlashcardGenerationOptions> = {
-  language: "pt-BR",
-  cardCount: 12,
+  language: "en",
+  cardCount: 10,
   difficulty: "basic",
   style: "qa",
+  focusTypes: ["definitions", "qa"],
 };
+
+export const CARD_COUNT_MIN = 5;
+export const CARD_COUNT_MAX = 50;
+export const CONTENT_MIN_CHARS = 100;
+export const CONTENT_MAX_CHARS = 50000;
