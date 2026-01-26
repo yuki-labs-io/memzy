@@ -4,7 +4,7 @@ import {
   FlashcardGenerationOptions,
   FlashcardGenerationResult,
   DEFAULT_OPTIONS,
-} from "@/context/domain/entities/flashcard.entity";
+} from "@/context/domain/entities/Flashcard.entity";
 import {
   InvalidAPIKeyError,
   ProviderUnavailableError,
@@ -243,6 +243,17 @@ export class OpenAIAdapter implements ILLMAdapter {
         "Create cards that test deep understanding, edge cases, and complex relationships for advanced learners.",
     };
 
+    const focusTypeDescriptions = {
+      definitions: "concept and explanation format - define key terms and concepts",
+      qa: "question and answer pairs that test understanding",
+      dates: "timeline and chronological information - important dates and events",
+      vocabulary: "terms and their meanings - vocabulary and terminology",
+    };
+
+    const focusInstructions = options.focusTypes.length > 0
+      ? `Focus your flashcards on the following types:\n${options.focusTypes.map((type) => `  - ${focusTypeDescriptions[type]}`).join("\n")}\n\nDistribute the flashcards across these focus types.`
+      : "";
+
     return `Analyze the following content and generate ${options.cardCount} flashcards in ${options.language} to help students learn the key concepts.
 
 Instructions:
@@ -250,7 +261,8 @@ Instructions:
 - Create exactly ${options.cardCount} flashcards (or fewer if content doesn't support that many)
 - ${styleInstructions}
 - Difficulty level: ${options.difficulty} - ${difficultyInstructions[options.difficulty]}
-- Each answer should be concise but complete
+${focusInstructions}
+- Each answer should be concise but complete in ${options.language}
 - Focus on understanding, not just memorization
 - Include relevant tags for categorization
 - Optionally include a brief source quote that the card is based on
